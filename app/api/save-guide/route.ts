@@ -35,14 +35,20 @@ export async function POST(request: Request) {
 
     if (guideError) throw guideError
 
-    // Format steps
+    // 2. Format the steps
     const formattedSteps = steps.map((step: any, index: number) => ({
       guide_id: guideData.id,
       order_index: index,
       selector: step.path || step.id || step.attributes,
-      title: `Step ${index + 1}`,
-      content: `Click on the <${step.tagName}> element`,
-      action_type: "click",
+
+      // FIX: Use the step's title if it exists, otherwise fallback
+      title: step.title || `Step ${index + 1}`,
+
+      // FIX: Use the step's content if it exists, otherwise fallback
+      content: step.content || `Click on the <${step.tagName}> element`,
+
+      // Save the color too!
+      action_type: step.color || "click",
     }))
 
     // Insert steps
