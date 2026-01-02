@@ -26,15 +26,25 @@ export async function POST(request: Request) {
 
         // 1. Create or Update Guide
         if (guideId) {
-            const { error } = await supabase
+            // --- UPDATE EXISTING ---
+            console.log("♻️ Attempting Update for ID:", guideId)
+            const { error, data } = await supabase
                 .from("guides")
                 .update({ title: title || "Untitled Guide" })
                 .eq("id", guideId)
+                .select() // <--- IMPORTANT: Ask for data back
             if (error) throw error
-
-            // Clear old steps to replace them
-            await supabase.from("steps").delete().eq("guide_id", guideId)
-        } else {
+            // CHECK: Did we actually find and update a guide?
+            if (!data || data.length === 0) {
+                console.log("⚠️ Guide ID not found (deleted?). Creating new instead.")
+                guideId = null // Reset ID so we trigger the creation logic below
+            } else {
+                // ID exists, proceed to clear old steps
+                await supabase.from("steps").delete().eq("guide_id", guideId)
+            }
+        } if (!guideId) {
+            // --- CREATE NEW ---
+            console.log("🆕 Attempting New Creation")
             const { data: guideData, error: guideError } = await supabase
                 .from("guides")
                 .insert([{
