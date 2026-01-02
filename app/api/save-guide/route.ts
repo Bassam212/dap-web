@@ -71,7 +71,7 @@ export async function POST(request: Request) {
             xpath: step.xpath, // Ensure this matches the column name in Supabase
             // --------------------
 
-            element_text: step.content,
+            element_text: step.innerText || "", // Use the actual text from the screen
             meta_data: {
                 tagName: step.tagName,
                 hoverSelector: step.hoverSelector,
