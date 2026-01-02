@@ -1,47 +1,51 @@
 import { supabase } from "@/src/lib/supabase"
 import { NextResponse } from "next/server"
 
-// Helper to add CORS headers
 function corsResponse(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', '*') // Allow ALL sites (Extension runs everywhere)
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  response.headers.set('Access-Control-Allow-Origin', '*')
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   return response
 }
 
-// 1. Handle the "Preflight" check (Browser asks: "Can I talk to you?")
 export async function OPTIONS() {
   return corsResponse(NextResponse.json({}, { status: 200 }))
 }
 
-// 2. Handle the actual Data Save
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, url, steps, id } = body
+    const { id, title, url, steps } = body
+
+    // LOGGING: Check Vercel Logs to see if ID/XPath is arriving
+    console.log(`📥 API Received: ${title}`, {
+      hasId: !!id,
+      stepsCount: steps.length,
+      firstStepXPath: steps[0]?.xpath
+    })
+
     let guideId = id
 
-    console.log("📝 Received guide:", title)
-    // 1. Create OR Update Guide
+    // 1. CREATE or UPDATE Guide
     if (guideId) {
-      // UPDATE EXISTING
-      console.log("♻️ Updating Guide:", guideId)
+      // --- UPDATE EXISTING ---
+      console.log("♻️ Updating Guide ID:", guideId)
       const { error } = await supabase
         .from("guides")
         .update({
           title: title || "Untitled Guide",
-          // Don't overwrite trigger_url usually, but you can if needed
+          // trigger_url: url, // Optional: Update URL on save?
         })
         .eq("id", guideId)
 
       if (error) throw error
 
-      // Clear old steps so we can replace them
+      // Clean old steps to replace them
       await supabase.from("steps").delete().eq("guide_id", guideId)
 
     } else {
-      // CREATE NEW
-      console.log("✨ Creating New Guide")
+      // --- CREATE NEW ---
+      console.log("✨ Creating NEW Guide")
       const { data: guideData, error: guideError } = await supabase
         .from("guides")
         .insert([{
@@ -56,42 +60,50 @@ export async function POST(request: Request) {
       guideId = guideData.id
     }
 
-    // 2. Format the steps
-    // 2. Format the steps to match Database Columns
-    const formattedSteps = steps.map((step: any, index: number) => ({
-      guide_id: guideId,
-      order_index: index,
-      selector: step.path || step.id || step.attributes,
+    // 2. INSERT STEPS (With XPath Support)
+    const formattedSteps = steps.map((step: any, index: number) => {
+      // Fallback: If title is empty, make one up
+      const stepTitle = step.title || `Step ${index + 1}`
 
-      title: step.title || `Step ${index + 1}`,
-      content: step.content || `Click on the <${step.tagName}> element`,
-      action_type: "click",
+      return {
+        guide_id: guideId,
+        order_index: index,
 
-      // --- NEW FIELDS MAPPING ---
-      xpath: step.xpath, // <--- Save the XPath!
+        // CSS Selectors
+        selector: step.path || step.id || step.attributes,
 
-      // Store extra useful info in the JSONB column
-      meta_data: {
-        tagName: step.tagName,
-        hoverSelector: step.hoverSelector, // Save the hover trigger
-        color: step.color,
-        url: step.url
+        // Text Content
+        title: stepTitle,
+        content: step.content || `Click this element`,
+        action_type: "click", // Default action
+
+        // --- ROBUSTNESS FIELDS (This fixes the NULLs) ---
+        xpath: step.xpath || null,
+        element_text: step.content || null,
+
+        // --- METADATA (JSON) ---
+        meta_data: {
+          tagName: step.tagName,
+          hoverSelector: step.hoverSelector || null,
+          color: step.color || null,
+          url: step.url
+        }
       }
-    }))
+    })
 
-    // Insert steps
     const { error: stepsError } = await supabase
       .from("steps")
       .insert(formattedSteps)
 
-    if (stepsError) throw stepsError
+    if (stepsError) {
+      console.error("Steps Insert Error:", stepsError)
+      throw stepsError
+    }
 
-    // Success Response with CORS headers
-    return corsResponse(NextResponse.json({ success: true, guideId: guideId }))
+    return corsResponse(NextResponse.json({ success: true, guideId }))
 
   } catch (error: any) {
     console.error("❌ Server Error:", error)
-    // Error Response with CORS headers
     return corsResponse(NextResponse.json({ success: false, error: error.message }, { status: 500 }))
   }
 }
