@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GuideFlow Clone",
+  title: "GUIO.",
   description: "Cross-site interactive demos",
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {/* Global Navigation Bar */}
           <nav className="p-4 border-b flex justify-between items-center bg-white">
-            <span className="font-bold text-xl">GuideFlow Clone</span>
+            <span className="font-bold text-xl">GUIO.</span>
             <div>
               <SignedOut>
                 <SignInButton mode="modal" />
@@ -39,7 +39,7 @@ export default function RootLayout({
               </SignedIn>
             </div>
           </nav>
-          
+
           {/* Main Content */}
           {children}
         </body>

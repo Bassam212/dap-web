@@ -17,35 +17,23 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { id, title, url, steps } = body
 
-    // LOGGING: Check Vercel Logs to see if ID/XPath is arriving
-    console.log(`📥 API Received: ${title}`, {
-      hasId: !!id,
-      stepsCount: steps.length,
-      firstStepXPath: steps[0]?.xpath
-    })
+    // LOGGING: Check Vercel Logs to see if XPath is arriving
+    console.log(`📥 Saving Guide: ${title}`)
+    console.log(`🔍 First Step XPath:`, steps[0]?.xpath) // <--- LOOK FOR THIS IN VERCEL LOGS
 
     let guideId = id
 
-    // 1. CREATE or UPDATE Guide
+    // 1. Create or Update Guide
     if (guideId) {
-      // --- UPDATE EXISTING ---
-      console.log("♻️ Updating Guide ID:", guideId)
       const { error } = await supabase
         .from("guides")
-        .update({
-          title: title || "Untitled Guide",
-          // trigger_url: url, // Optional: Update URL on save?
-        })
+        .update({ title: title || "Untitled Guide" })
         .eq("id", guideId)
-
       if (error) throw error
 
-      // Clean old steps to replace them
+      // Clear old steps to replace them
       await supabase.from("steps").delete().eq("guide_id", guideId)
-
     } else {
-      // --- CREATE NEW ---
-      console.log("✨ Creating NEW Guide")
       const { data: guideData, error: guideError } = await supabase
         .from("guides")
         .insert([{
@@ -55,45 +43,33 @@ export async function POST(request: Request) {
         }])
         .select()
         .single()
-
       if (guideError) throw guideError
       guideId = guideData.id
     }
 
-    // 2. INSERT STEPS (With XPath Support)
-    const formattedSteps = steps.map((step: any, index: number) => {
-      // Fallback: If title is empty, make one up
-      const stepTitle = step.title || `Step ${index + 1}`
+    // 2. Insert Steps (Explicitly mapping XPath)
+    const formattedSteps = steps.map((step: any, index: number) => ({
+      guide_id: guideId,
+      order_index: index,
+      selector: step.path || step.id || step.attributes,
+      title: step.title || `Step ${index + 1}`,
+      content: step.content || `Click this element`,
+      action_type: "click",
 
-      return {
-        guide_id: guideId,
-        order_index: index,
+      // --- CRITICAL FIX ---
+      xpath: step.xpath, // Ensure this matches the column name in Supabase
+      // --------------------
 
-        // CSS Selectors
-        selector: step.path || step.id || step.attributes,
-
-        // Text Content
-        title: stepTitle,
-        content: step.content || `Click this element`,
-        action_type: "click", // Default action
-
-        // --- ROBUSTNESS FIELDS (This fixes the NULLs) ---
-        xpath: step.xpath || null,
-        element_text: step.content || null,
-
-        // --- METADATA (JSON) ---
-        meta_data: {
-          tagName: step.tagName,
-          hoverSelector: step.hoverSelector || null,
-          color: step.color || null,
-          url: step.url
-        }
+      element_text: step.content,
+      meta_data: {
+        tagName: step.tagName,
+        hoverSelector: step.hoverSelector,
+        color: step.color,
+        url: step.url
       }
-    })
+    }))
 
-    const { error: stepsError } = await supabase
-      .from("steps")
-      .insert(formattedSteps)
+    const { error: stepsError } = await supabase.from("steps").insert(formattedSteps)
 
     if (stepsError) {
       console.error("Steps Insert Error:", stepsError)
@@ -103,7 +79,7 @@ export async function POST(request: Request) {
     return corsResponse(NextResponse.json({ success: true, guideId }))
 
   } catch (error: any) {
-    console.error("❌ Server Error:", error)
+    console.error("Server Error:", error)
     return corsResponse(NextResponse.json({ success: false, error: error.message }, { status: 500 }))
   }
 }
