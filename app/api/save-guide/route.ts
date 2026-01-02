@@ -39,16 +39,24 @@ export async function POST(request: Request) {
     const formattedSteps = steps.map((step: any, index: number) => ({
       guide_id: guideData.id,
       order_index: index,
-      selector: step.path || step.id || step.attributes,
 
-      // FIX: Use the step's title if it exists, otherwise fallback
+      // PRIMARY STRATEGY: The best CSS selector we have
+      selector: step.id || step.attributes || step.path,
+
+      // FALLBACK STRATEGIES (New!)
+      xpath: step.xpath,
+      element_text: step.content, // Often the inner text of the button
+
+      // METADATA
+      meta_data: {
+        tagName: step.tagName,
+        hoverSelector: step.hoverSelector,
+        originalPath: step.path
+      },
+
       title: step.title || `Step ${index + 1}`,
-
-      // FIX: Use the step's content if it exists, otherwise fallback
-      content: step.content || `Click on the <${step.tagName}> element`,
-
-      // Save the color too!
-      action_type: step.color || "click",
+      content: step.content || `Click on this element`,
+      action_type: "click",
     }))
 
     // Insert steps

@@ -1,4 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
+import Link from "next/link";
+import GuideRow from "@/src/components/GuideRow";
 
 // This ensures the page refreshes data every time you visit (no stale cache)
 export const dynamic = "force-dynamic";
@@ -22,6 +24,13 @@ export default async function Dashboard() {
             <h1 className="text-3xl font-bold text-gray-900">My Guides</h1>
             <p className="text-gray-500 mt-1">Manage your interactive walkthroughs</p>
           </div>
+          {/* ANALYTICS LINK */}
+          <Link
+            href="/analytics"
+            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition flex items-center gap-2"
+          >
+            📊 View Analytics
+          </Link>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
             + New Guide
           </button>
@@ -47,14 +56,12 @@ export default async function Dashboard() {
                       <span>{new Date(guide.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-3">
-                  <a href={`/guide/${guide.id}`} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
-                  Edit
-                  </a>
-                    <button className="text-gray-600 hover:text-red-600 font-medium text-sm">
-                      Delete
-                    </button>
+                    <a href={`/guide/${guide.id}`} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                      Edit
+                    </a>
+                    <GuideRow key={guide.id} guide={guide} />
                   </div>
                 </div>
               ))}
