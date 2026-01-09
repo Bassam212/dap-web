@@ -76,6 +76,7 @@ export async function POST(request: Request) {
                 tagName: step.tagName,
                 hoverSelector: step.hoverSelector,
                 color: step.color,
+                stepType: step.stepType || "info",
                 url: step.url
             }
         }))
