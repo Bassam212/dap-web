@@ -81,7 +81,7 @@ export default function UsersPage() {
     if (!confirm('Are you sure you want to remove this member?')) return
 
     try {
-      const membership = memberships?.data?.find(m => m.publicUserData.userId === userId)
+      const membership = memberships?.data?.find(m => m.publicUserData?.userId === userId)
       if (membership) {
         await membership.destroy()
         await memberships?.revalidate?.()
@@ -94,7 +94,7 @@ export default function UsersPage() {
 
   const handleUpdateRole = async (userId: string, newRole: "admin" | "user") => {
     try {
-      const membership = memberships?.data?.find(m => m.publicUserData.userId === userId)
+      const membership = memberships?.data?.find(m => m.publicUserData?.userId === userId)
       if (membership) {
         const clerkRole = newRole === "admin" ? "org:admin" : "org:member"
         await membership.update({ role: clerkRole })
@@ -165,7 +165,7 @@ export default function UsersPage() {
 
           <div className="divide-y divide-gray-100">
             {memberships?.data?.map((membership) => {
-              const isUserCreator = isCreator(membership.publicUserData.userId!)
+              const isUserCreator = isCreator(membership.publicUserData?.userId!)
               const canModify = permissions.canManageMembers && !isUserCreator
 
               return (
@@ -173,20 +173,20 @@ export default function UsersPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gray-900 text-white rounded-full flex items-center justify-center font-semibold text-sm">
-                        {membership.publicUserData.firstName?.[0] || membership.publicUserData.identifier?.[0]?.toUpperCase() || 'U'}
+                        {membership.publicUserData?.firstName?.[0] || membership.publicUserData?.identifier?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-gray-900">
-                            {membership.publicUserData.firstName} {membership.publicUserData.lastName}
-                            {membership.publicUserData.userId === user?.id && (
+                            {membership.publicUserData?.firstName} {membership.publicUserData?.lastName}
+                            {membership.publicUserData?.userId === user?.id && (
                               <span className="text-xs text-gray-500 ml-2">(You)</span>
                             )}
                           </h3>
                           {isUserCreator ? getSuperAdminBadge() : getRoleBadge(membership.role)}
                         </div>
                         <p className="text-sm text-gray-600">
-                          {membership.publicUserData.identifier}
+                          {membership.publicUserData?.identifier}
                         </p>
                       </div>
                     </div>
@@ -195,7 +195,7 @@ export default function UsersPage() {
                       <div className="flex items-center gap-2">
                         <select
                           value={membership.role === 'org:admin' ? 'admin' : 'user'}
-                          onChange={(e) => handleUpdateRole(membership.publicUserData.userId!, e.target.value as any)}
+                          onChange={(e) => handleUpdateRole(membership.publicUserData?.userId!, e.target.value as any)}
                           className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none"
                         >
                           <option value="user">User</option>
@@ -203,7 +203,7 @@ export default function UsersPage() {
                         </select>
 
                         <button
-                          onClick={() => handleRemoveMember(membership.publicUserData.userId!)}
+                          onClick={() => handleRemoveMember(membership.publicUserData?.userId!)}
                           className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition"
                           title="Remove member"
                         >
