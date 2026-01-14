@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import Sidebar from "@/src/components/Sidebar";
 import SearchBar from "@/src/components/SearchBar";
+import CreateOrganizationModal from "@/src/components/CreateOrganizationModal";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,6 +30,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <SignedIn>
+            <CreateOrganizationModal />
+          </SignedIn>
+
           <div className="flex min-h-screen">
             {/* Sidebar */}
             <Sidebar />
