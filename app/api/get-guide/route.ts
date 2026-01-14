@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       return corsResponse(NextResponse.json({ error: "URL is required" }, { status: 400 }))
     }
 
-    console.log("🔍 Searching for guide on:", url)
+    console.log("Searching for guide on:", url)
 
     // 1. Find the guide for this URL
     // We also fetch the 'steps' relation automatically

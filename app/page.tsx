@@ -1,6 +1,7 @@
 import { supabase } from "@/src/lib/supabase";
 import Link from "next/link";
 import GuideRow from "@/src/components/GuideRow";
+import { BarChart3, Plus, FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +29,13 @@ export default async function Dashboard() {
               href="/analytics"
               className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition flex items-center gap-2"
             >
-              📊 View Analytics
+              <BarChart3 size={18} />
+              View Analytics
             </Link>
 
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
-              + New Guide
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2">
+              <Plus size={18} />
+              New Guide
             </button>
           </div>
         </header>
@@ -47,7 +50,9 @@ export default async function Dashboard() {
             </div>
           ) : (
             <div className="p-12 text-center">
-              <div className="inline-block p-4 bg-gray-100 rounded-full mb-4 text-4xl">📝</div>
+              <div className="inline-flex p-4 bg-gray-100 rounded-full mb-4">
+                <FileText size={48} className="text-gray-400" />
+              </div>
               <h3 className="text-lg font-medium text-gray-900">No guides yet</h3>
               <p className="text-gray-500 mt-1">
                 Open your Chrome Extension on any website to create one!

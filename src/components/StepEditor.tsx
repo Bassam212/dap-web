@@ -22,10 +22,10 @@ export default function StepEditor({ steps: initialSteps, guideId }: any) {
         body: JSON.stringify({ steps }),
       })
       if (res.ok) {
-        alert("✅ Updates Saved!")
+        alert("Updates Saved!")
         router.refresh() // Reloads data from server
       } else {
-        alert("❌ Failed to save")
+        alert("Failed to save")
       }
     } catch (e) {
       console.error(e)

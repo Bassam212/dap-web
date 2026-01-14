@@ -16,18 +16,18 @@ export async function POST(request: Request) {
     try {
         const body = await request.json()
         const { id, title, url, steps } = body
-        console.log(`🚀 API VERSION 2.0 (Jan 2026) - XPath Check`)
+        console.log(`API VERSION 2.0 (Jan 2026) - XPath Check`)
 
         // LOGGING: Check Vercel Logs to see if XPath is arriving
-        console.log(`📥 Saving Guide: ${title}`)
-        console.log(`🔍 First Step XPath:`, steps[0]?.xpath) // <--- LOOK FOR THIS IN VERCEL LOGS
+        console.log(`Saving Guide: ${title}`)
+        console.log(`First Step XPath:`, steps[0]?.xpath) // <--- LOOK FOR THIS IN VERCEL LOGS
 
         let guideId = id
 
         // 1. Create or Update Guide
         if (guideId) {
             // --- UPDATE EXISTING ---
-            console.log("♻️ Attempting Update for ID:", guideId)
+            console.log("Attempting Update for ID:", guideId)
             const { error, data } = await supabase
                 .from("guides")
                 .update({ title: title || "Untitled Guide" })
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
             if (error) throw error
             // CHECK: Did we actually find and update a guide?
             if (!data || data.length === 0) {
-                console.log("⚠️ Guide ID not found (deleted?). Creating new instead.")
+                console.log("WARNING: Guide ID not found (deleted?). Creating new instead.")
                 guideId = null // Reset ID so we trigger the creation logic below
             } else {
                 // ID exists, proceed to clear old steps
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
             }
         } if (!guideId) {
             // --- CREATE NEW ---
-            console.log("🆕 Attempting New Creation")
+            console.log("Attempting New Creation")
             const { data: guideData, error: guideError } = await supabase
                 .from("guides")
                 .insert([{
