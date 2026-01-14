@@ -32,11 +32,12 @@ export default function AnalyticsDashboard({ data }: { data: any[] }) {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-2">
-        <h1 className="text-3xl font-bold text-gray-900">Workspace Analytics</h1>
-        <p className="text-gray-500 mt-1">Track performance across all your guides</p>
-      </div>
+    <div className="p-8 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Workspace Analytics</h1>
+          <p className="text-gray-500 mt-1">Track performance across all your guides</p>
+        </div>
 
       {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -154,6 +155,7 @@ export default function AnalyticsDashboard({ data }: { data: any[] }) {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

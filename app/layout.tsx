@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import Sidebar from "@/src/components/Sidebar";
+import SearchBar from "@/src/components/SearchBar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,21 +29,31 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          {/* Global Navigation Bar */}
-          <nav className="p-4 border-b flex justify-between items-center bg-white">
-            <span className="font-bold text-xl">GUIO.</span>
-            <div>
-              <SignedOut>
-                <SignInButton mode="modal" />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-          </nav>
+          <div className="flex min-h-screen">
+            {/* Sidebar */}
+            <Sidebar />
 
-          {/* Main Content */}
-          {children}
+            {/* Main Content Area with top bar */}
+            <div className="flex-1 ml-60">
+              {/* Top Search Bar */}
+              <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-6">
+                <div className="flex items-center gap-4">
+                  <SearchBar />
+                  <SignedOut>
+                    <SignInButton mode="modal" />
+                  </SignedOut>
+                  <SignedIn>
+                    <UserButton />
+                  </SignedIn>
+                </div>
+              </header>
+
+              {/* Page Content */}
+              <main className="bg-gray-50">
+                {children}
+              </main>
+            </div>
+          </div>
         </body>
       </html>
     </ClerkProvider>

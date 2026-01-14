@@ -1,6 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
 import Link from "next/link";
-import GuideRow from "@/src/components/GuideRow";
+import GuideCard from "@/src/components/GuideCard";
 import { BarChart3, Plus, FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +16,8 @@ export default async function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 font-sans">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen p-8">
+      <div className="max-w-7xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Guides</h1>
@@ -27,39 +27,36 @@ export default async function Dashboard() {
           <div className="flex gap-3">
             <Link
               href="/analytics"
-              className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition flex items-center gap-2"
+              className="bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition flex items-center gap-2"
             >
               <BarChart3 size={18} />
               View Analytics
             </Link>
 
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2">
+            <button className="bg-blue-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2">
               <Plus size={18} />
               New Guide
             </button>
           </div>
         </header>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {guides && guides.length > 0 ? (
-            <div className="divide-y divide-gray-100">
-              {guides.map((guide) => (
-                // FIX: Only render the component. Do not write HTML here.
-                <GuideRow key={guide.id} guide={guide} />
-              ))}
+        {guides && guides.length > 0 ? (
+          <div className="space-y-4">
+            {guides.map((guide) => (
+              <GuideCard key={guide.id} guide={guide} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <div className="inline-flex p-4 bg-gray-100 rounded-full mb-4">
+              <FileText size={48} className="text-gray-400" />
             </div>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="inline-flex p-4 bg-gray-100 rounded-full mb-4">
-                <FileText size={48} className="text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900">No guides yet</h3>
-              <p className="text-gray-500 mt-1">
-                Open your Chrome Extension on any website to create one!
-              </p>
-            </div>
-          )}
-        </div>
+            <h3 className="text-lg font-medium text-gray-900">No guides yet</h3>
+            <p className="text-gray-500 mt-1">
+              Open your Chrome Extension on any website to create one!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
