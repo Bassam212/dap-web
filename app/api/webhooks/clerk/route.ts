@@ -3,21 +3,22 @@ import { Webhook } from 'svix'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 
-const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!
-
-// Create Supabase client with service role key for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+// Helper function to get Supabase admin client
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-)
+  )
+}
 
 export async function POST(req: Request) {
+  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!
   // Get headers
   const headerPayload = await headers()
   const svix_id = headerPayload.get('svix-id')
@@ -97,6 +98,7 @@ export async function POST(req: Request) {
 async function handleOrganizationCreated(evt: WebhookEvent) {
   if (evt.type !== 'organization.created') return
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { id, name, slug, created_by } = evt.data
 
   console.log('Creating organization in Supabase:', { id, name, slug })
@@ -147,6 +149,7 @@ async function handleOrganizationCreated(evt: WebhookEvent) {
 async function handleOrganizationUpdated(evt: WebhookEvent) {
   if (evt.type !== 'organization.updated') return
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { id, name, slug } = evt.data
 
   console.log('Updating organization in Supabase:', { id, name, slug })
@@ -170,6 +173,7 @@ async function handleOrganizationUpdated(evt: WebhookEvent) {
 async function handleOrganizationDeleted(evt: WebhookEvent) {
   if (evt.type !== 'organization.deleted') return
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { id } = evt.data
 
   console.log('Deleting organization from Supabase:', { id })
@@ -190,6 +194,7 @@ async function handleOrganizationDeleted(evt: WebhookEvent) {
 async function handleMembershipCreated(evt: WebhookEvent) {
   if (evt.type !== 'organizationMembership.created') return
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { organization, public_user_data, role } = evt.data
 
   console.log('Adding member to organization:', {
@@ -239,6 +244,7 @@ async function handleMembershipCreated(evt: WebhookEvent) {
 async function handleMembershipUpdated(evt: WebhookEvent) {
   if (evt.type !== 'organizationMembership.updated') return
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { organization, public_user_data, role } = evt.data
 
   console.log('Updating member:', {
@@ -298,6 +304,7 @@ async function handleMembershipUpdated(evt: WebhookEvent) {
 async function handleMembershipDeleted(evt: WebhookEvent) {
   if (evt.type !== 'organizationMembership.deleted') return
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { organization, public_user_data } = evt.data
 
   console.log('Removing member from organization:', {
