@@ -222,7 +222,7 @@ async function handleMembershipCreated(evt: WebhookEvent) {
     .upsert({
       organization_id: org.id,
       clerk_user_id: public_user_data?.user_id,
-      email: public_user_data?.email_address || '',
+      email: public_user_data?.identifier || '',
       role: mappedRole
     }, {
       onConflict: 'organization_id,clerk_user_id'
@@ -282,7 +282,7 @@ async function handleMembershipUpdated(evt: WebhookEvent) {
     .from('organization_members')
     .update({
       role: mappedRole,
-      email: public_user_data?.email_address || ''
+      email: public_user_data?.identifier || ''
     })
     .eq('organization_id', org.id)
     .eq('clerk_user_id', public_user_data?.user_id)
