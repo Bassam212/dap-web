@@ -130,11 +130,6 @@ export default function UsersPage() {
     </span>
   )
 
-  // Check if current user is super admin (creator)
-  const isCreator = (userId: string) => {
-    return userId === organization.createdBy
-  }
-
   return (
     <div className="p-8 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -165,8 +160,9 @@ export default function UsersPage() {
 
           <div className="divide-y divide-gray-100">
             {memberships?.data?.map((membership) => {
-              const isUserCreator = isCreator(membership.publicUserData?.userId!)
-              const canModify = permissions.canManageMembers && !isUserCreator
+              // Show super admin badge if current logged-in user is super_admin
+              const showSuperAdminBadge = membership.publicUserData?.userId === user?.id && permissions.role === 'super_admin'
+              const canModify = permissions.canManageMembers && !showSuperAdminBadge
 
               return (
                 <div key={membership.id} className="p-4 hover:bg-gray-50 transition">
@@ -183,7 +179,7 @@ export default function UsersPage() {
                               <span className="text-xs text-gray-500 ml-2">(You)</span>
                             )}
                           </h3>
-                          {isUserCreator ? getSuperAdminBadge() : getRoleBadge(membership.role)}
+                          {showSuperAdminBadge ? getSuperAdminBadge() : getRoleBadge(membership.role)}
                         </div>
                         <p className="text-sm text-gray-600">
                           {membership.publicUserData?.identifier}
@@ -212,7 +208,7 @@ export default function UsersPage() {
                       </div>
                     )}
 
-                    {isUserCreator && (
+                    {showSuperAdminBadge && (
                       <div className="text-xs text-gray-500">
                         Organization Owner
                       </div>
