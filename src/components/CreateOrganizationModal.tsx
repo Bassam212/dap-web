@@ -36,11 +36,9 @@ export default function CreateOrganizationModal() {
       }
 
       // Create organization through Clerk
-      const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-
+      // Clerk will auto-generate a slug if slugs are enabled in your instance
       const newOrg = await createOrganization({
         name: orgName,
-        slug: slug,
       })
 
       // Set the new organization as active
