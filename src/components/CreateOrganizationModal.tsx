@@ -7,7 +7,11 @@ import { Building2, X } from "lucide-react"
 
 export default function CreateOrganizationModal() {
   const { organization } = useOrganization()
-  const { organizationList, setActive } = useOrganizationList()
+  const { userMemberships, createOrganization, setActive, isLoaded } = useOrganizationList({
+    userMemberships: {
+      infinite: true,
+    },
+  })
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [orgName, setOrgName] = useState("")
@@ -16,10 +20,10 @@ export default function CreateOrganizationModal() {
 
   useEffect(() => {
     // Show modal if user has no organization
-    if (organizationList && organizationList.length === 0 && !organization) {
+    if (isLoaded && userMemberships.data?.length === 0 && !organization) {
       setIsOpen(true)
     }
-  }, [organizationList, organization])
+  }, [isLoaded, userMemberships.data, organization])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,19 +31,22 @@ export default function CreateOrganizationModal() {
     setIsCreating(true)
 
     try {
-      if (!setActive) {
-        throw new Error("Organization list not loaded")
+      if (!createOrganization) {
+        throw new Error("Organization creation not available")
       }
 
       // Create organization through Clerk
       const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
-      const newOrg = await setActive({
-        organization: {
-          name: orgName,
-          slug: slug,
-        },
+      const newOrg = await createOrganization({
+        name: orgName,
+        slug: slug,
       })
+
+      // Set the new organization as active
+      if (setActive && newOrg) {
+        await setActive({ organization: newOrg.id })
+      }
 
       // Clerk webhook will handle syncing to Supabase
       setIsOpen(false)
