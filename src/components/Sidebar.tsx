@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
 import { LayoutGrid, BarChart3, Users, Settings, Share2, Puzzle } from "lucide-react"
 
 const menuItems = [
@@ -15,6 +16,44 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { user, isLoaded } = useUser()
+
+  // Get user initials for avatar
+  const getInitials = () => {
+    if (!user) return "?"
+    const firstName = user.firstName || ""
+    const lastName = user.lastName || ""
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`
+    }
+    if (firstName) return firstName[0]
+    if (user.username) return user.username[0].toUpperCase()
+    if (user.primaryEmailAddress?.emailAddress) {
+      return user.primaryEmailAddress.emailAddress[0].toUpperCase()
+    }
+    return "U"
+  }
+
+  // Get display name
+  const getDisplayName = () => {
+    if (!user) return "Loading..."
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName[0]}.`
+    }
+    if (user.firstName) return user.firstName
+    if (user.username) return user.username
+    if (user.primaryEmailAddress?.emailAddress) {
+      return user.primaryEmailAddress.emailAddress.split("@")[0]
+    }
+    return "User"
+  }
+
+  // Get workspace/account info
+  const getWorkspaceInfo = () => {
+    if (!user) return ""
+    // You can customize this based on your workspace/plan logic
+    return user.username || "Pro Workspace"
+  }
 
   return (
     <aside className="w-60 h-screen bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0">
@@ -51,15 +90,29 @@ export default function Sidebar() {
 
       {/* User Profile */}
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-semibold">
-            B
+        {isLoaded && user ? (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+              {getInitials()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-gray-900 truncate">
+                {getDisplayName()}
+              </div>
+              <div className="text-xs text-gray-500 truncate">
+                {getWorkspaceInfo()}
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-sm font-semibold text-gray-900">Brett M.</div>
-            <div className="text-xs text-gray-500">Pro Workspace</div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-gray-200 rounded animate-pulse" />
+              <div className="h-2 bg-gray-200 rounded w-2/3 animate-pulse" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   )
